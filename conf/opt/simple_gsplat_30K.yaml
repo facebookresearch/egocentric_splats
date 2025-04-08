@@ -1,0 +1,185 @@
+
+# densification strategy (supported by gsplat): default or MCMC
+densification_strategy: "default"
+# densification_strategy: "MCMC"
+
+# save checkpoint every N iterations
+ckpt_every_n_steps: 10000
+
+# accumulation gradient if > 1
+accumulate_grad_batches: 1
+
+# total number of iterations
+iterations: 30_000
+# run validation every N steps
+val_every_n_steps: 1999
+
+# Random crop size for training  (experimental)
+# patch_size: None
+# A global scaler that applies to the scene size related parameters
+global_scale: !!float 1.0
+
+# Batch size for training. Learning rates are scaled automatically
+batch_size: !!int 1
+
+# A global factor to scale the number of training steps
+# All the other optimization parameters will be adjusted accordingly
+steps_scaler: !!float 1.0
+
+##############
+# handle rolling shuter if true 
+handle_rolling_shutter: true
+# the start iteration to handle rolling shutter and motion blur (it would be slower if start from the begining)
+handle_rolling_shutter_start_iter: 10000
+
+# Number of training steps
+# max_steps: !!int 30_000
+# Steps to evaluate the model
+# eval_steps: [7_000, 30_000]
+# Steps to save the model
+# save_steps: [7_000, 30_000])
+
+# Initialization strategy
+init_type: "sfm"
+# Initial number of GSs. Ignored if using sfm as initialization
+init_num_pts: !!int 100_000
+# Initial extent of GSs as a multiple of the camera extent. Ignored if using sfm
+init_extent: !!float 3.0
+# Degree of spherical harmonics
+sh_degree: !!int 3
+# Turn on another SH degree every this steps
+sh_degree_interval: !!int 1000
+# Initial opacity of GS
+init_opa: !!float 0.1
+# Initial scale of GS
+init_scale: !!float 1.0
+# Weight for SSIM loss
+ssim_lambda: !!float 0.2
+
+# Near plane clipping distance
+near_plane: !!float 0.01
+# Far plane clipping distance
+far_plane: !!float 1e10
+
+################################################################
+# Gaussian Splatting Default strategy parameters
+gs_default_strategy:
+  # GSs with opacity below this value will be pruned
+  prune_opa: !!float 0.005
+  # GSs with image plane gradient above this value will be split/duplicated
+  grow_grad2d: !!float 0.0002
+  # GSs with scale below this value will be duplicated. Above will be split
+  grow_scale3d: !!float 0.01
+  # GSs with scale above this value will be pruned.
+  prune_scale3d: !!float 0.1
+
+  # Start refining GSs after this iteration
+  refine_start_iter: !!int 500
+  # Stop refining GSs after this iteration
+  refine_stop_iter: !!int 15_000
+  # Reset opacities every this steps
+  reset_every: !!int 3000
+  # Refine GSs every this steps
+  refine_every: !!int 100
+
+# Use packed mode for rasterization, this leads to less memory usage but slightly slower.
+packed: !!bool False
+# Use sparse gradients for optimization. (experimental)
+sparse_grad: !!bool False
+# Use absolute gradient for pruning. This typically requires larger --grow_grad2d, e.g., 0.0008 or 0.0006
+absgrad: !!bool True
+# Anti-aliasing in rasterization. Might slightly hurt quantitative metrics.
+antialiased: !!bool False
+# Whether to use revised opacity heuristic from arXiv:2404.06109 (experimental)
+revised_opacity: !!bool False
+
+# Use random background for training to discourage transparency
+random_bkgd: !!bool False
+
+###################################################################
+# Gaussian-MCMC related hyper-parameters
+# The maximum number of gaussians. used in MCMC strategy (could be used in others as well)
+mcmc_strategy:
+  cap_max: 6_000_000 
+  noise_lr: 5e5
+  mcmc_refine_start_iter: 500
+  mcmc_refine_stop_iter: 25_000
+  mcmc_refine_every: 100
+  mcmc_min_opacity: 0.005
+opacity_reg: 0.0
+scale_reg: 0.0
+
+###################################################################
+# Enable bilateral grid optimization 
+bilateral_grid: 
+  lr: 5e-3 # default from the original 2e-3
+  linear_lr_iteration: 1000 # linear warmp up until this number 
+  exponential_decay_ratio: 0.01 
+
+
+###################################################################
+# Enable camera optimization. (experimental) not used yet
+pose_opt: !!bool False
+# Learning rate for camera optimization
+pose_opt_lr: !!float 1e-5
+# Regularization for camera optimization as weight decay
+pose_opt_reg: !!float 1e-6
+# Add noise to camera extrinsics. This is only to test the camera pose optimization.
+pose_noise: !!float 0.0
+
+###################################################################
+# Enable appearance optimization. (experimental) not used yet
+app_opt: !!bool False
+# Appearance embedding dimension
+app_embed_dim: !!int 16
+# Learning rate for appearance optimization
+app_opt_lr: !!float 1e-3
+# Regularization for appearance optimization as weight decay
+app_opt_reg: !!float 1e-6
+
+
+###################################################################
+## Image losses
+
+# use gamme corrected loss (with gamma 2.0)
+# This will turn the photon shot noise into a constant
+gamma_loss: !!bool false
+
+# choose between l1, huber 
+pixel_loss: "l1"
+# For huber loss, we will use a much bigger ratio.
+# For L1 loss, the default loss ratio is 0.8
+pixel_lambda: 0.8
+
+# Add a gradient loss based on the image luminance
+l1_grad: False
+l1_grad_lamda: 0.1
+
+# Apply the Aria SALM camera noise model 
+read_noise_factor: 0.1 
+shot_noise_factor: 0.04
+
+ssim_Loss: !!bool True
+# dssim loss ratio, default to be 0.2 same as 3D GS paper
+dssim_lambda: 0.2
+
+# Enable depth loss
+depth_loss: !!bool False
+# Weight for depth loss
+depth_lambda: 2e-4
+
+###################################################################
+## The following parameters currently are only used for 2d-gs
+###################################################################
+# Enable normal consistency loss.
+normal_loss: !!bool True
+# Weight for normal loss
+normal_lambda: !!float 5e-2
+# Iteration to start normal consistency regulerization
+normal_start_iter: !!int 7_000
+# Distortion loss.
+dist_loss: !!bool True
+# Weight for distortion loss
+dist_lambda: !!float 1e-2
+# Iteration to start distortion loss regulerization
+dist_start_iter: !!int 3_000

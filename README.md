@@ -16,6 +16,12 @@
 
 ## Overview
 
+## Checklist
+
+- [x] Data preprocessing script for Project Aria data
+- [ ] Training script for Project Aria data
+- [ ] Interactive view for the trained model
+- [ ] Batch training and evaluation for Aria Scene Dataset
 
 ## Quick start
 
@@ -125,9 +131,11 @@ where 'camera-rgb-images', 'camera-slam-left-images', 'camera-slam-right-images'
 * Read the exposure time and analogy gain for each frame.
 
 ### Use factory calibration instead of online calibration
-In the script, there is an option to used factory calibration instead of online calibrated camera. We don't recommend this in the downstream reconstruction since we have concluded such online device calibration is crucial in particular using RGB camera as input. This was used when doing the ablation study.
+In the script, there is an option to used factory calibration instead of online calibrated camera. We don't recommend this in the downstream reconstruction since we have concluded the online device calibration is crucial in particular using RGB camera as input.
 
-To generate such calibration as well as the following rectification. Run with the mode "--use_factory_calib" in the [preprocessing script](#aria-preprocess-script). It will generate all the results with a post-fix called "-factory-calib" as following:
+Note the improvement over factory calibration will only be valid when the visual intertial bundle adjustment (VIBA) is enabled when running MPS. Without VIBA, there will not be much performance gain using online calibration.
+
+To generate factory calibrated data, run with the mode "--use_factory_calib" in the [preprocessing script](#aria-preprocess-script). It will generate all the results with a post-fix called "-factory-calib" as following:
 ```
 $DATA_PROCESSED_DIR
 - camera-rgb-images-factory-calib
@@ -141,20 +149,20 @@ $DATA_PROCESSED_DIR
 ### Generate rectified images and sparse visible point cloud
 
 In the second stage of the method, according to the provided the pinhole camera model, the script will further generate the rectified images for each stream. The pinhole camera model parameters were set in the [preprocessing script](#aria-preprocess-script) with the following config
-```
+``` bash
 --rectified_rgb_focal 1200 \
 --rectified_rgb_size 2000 \
 --rectified_monochrome_focal 180 \
 --rectified_monochrome_height 480 \
 ```
 which set the focal and image size for rectified image streams. Note for RGB camera, there are two image resolution options, the above focal length and image size are for the full image resolution size (2880x2880). For half resolutoin RGB image (1408x1408), a reasonable estimate to retain the original FoV and size of the image can be
-```
+``` bash
 --rectified_rgb_focal 600 \
 --rectified_rgb_size 1000 \
 ```
 
 It will generate the following rectified camera stream output with an explanation of each file in the comments
-```
+``` bash
 - camera-rgb-rectified-1200-h1600
 ----images                      # The rectified RGB images
 ----transforms.json             # The transform json file
@@ -182,29 +190,6 @@ When setting the rectified_*_focal number smaller than 0, it will skip preproces
 --rectified_rgb_focal -1
 ```
 It will skip generate rectified image data for RGB stream.
-
-
-### Streamlined preprocess in AWS cluster
-
-We have prepared the scripts to streamline the jobs within AWS cluster.
-
-For example
-``` bash
-# This is the input vrs directory
-DATA_INPUT_DIR=/source_1a/data/DTCDataset/experimental/sun_08_06
-# This is the output of preprocessed files
-DATA_PROCESSED_DIR=/source_1a/data/DTCDataset/experimental/sun_08_06
-# This is the vrs file to be used
-vrs_file=library_max_exp_2ms_lux_800.vrs
-# Run a preprocessing script
-bash scripts/aws/submit_preprocess_single.sh $DATA_INPUT_DIR $DATA_PROCESSED_DIR $vrs_file
-```
-
-To run the batch processing at scale, you can find the examplar scripts at
-``` bash!
-bash scripts/aws/submit_preprocess_batch.sh
-```
-which will automatically launch multiple slurm jobs to batch process all vrs files.
 
 
 ## Run Gaussian-splatting algorithm

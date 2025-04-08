@@ -1,0 +1,31 @@
+torch>=2.2.0
+torchvision
+einops>=0.4.1
+wandb
+pyyaml
+imageio
+matplotlib
+tqdm
+opencv-python
+omegaconf
+fvcore
+iopath
+lpips
+numpy
+plyfile
+rerun-sdk
+imageio[ffmpeg]
+scikit-image
+projectaria-tools
+splines
+lightning
+lightning[pytorch-extra]
+natsort
+viser>=0.2.3
+exifread
+gsplat>=1.4.0
+# to support gsplat related decoding module
+# git+https://github.com/nerfstudio-project/gsplat
+
+# introduced in gsplats for fast ssim calculation
+# git+https://github.com/rahul-goel/fused-ssim@1272e21a282342e89537159e4bad508b19b34157

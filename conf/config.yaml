@@ -1,0 +1,123 @@
+defaults: 
+ - opt: simple_gsplat_30K # select other GS model 
+
+train_model: "gsplats"
+debug_from: -1
+detect_anomaly: !!bool False
+quiet: !!bool False
+start_checkpoint: null
+load_iter: null # If set, the Gaussians will be initialized from a particular iteration PLY file
+render_video: !!bool False
+exp_name: ""
+output_root: "./output"
+
+viewer: 
+  use_trainer_viewer: !!bool True
+  host: "0.0.0.0"
+  port: 8080
+
+train: 
+  shuffle: !!bool True
+  log_irradiance_image: !!bool True
+
+wandb: 
+  use_wandb: !!bool False # If false, we will turn off logging
+  project: "egoDTC"
+  entity: "surreal_dtc"
+
+scene:
+  data_root: ""
+  scene_name: ""
+  source_path: "" #${scene.data_root}/${scene.scene_name}
+  model_path: ${output_root}/${exp_name}
+  input_format: "aria"
+  images: "images"
+
+  masks: ""                     # Get a mask folder
+  mask_rendering: !!bool False      # Render mask 
+  random_background: !!bool False   # Random with a random color background 
+
+  # stride: 1
+  pcd_stride: 1 # subsample the initial point cloud with this rate
+  eval: !!bool False
+
+  data_format: "transforms_with_sparse_depth.json"
+  # validation set will take 1/8 of all images if using 7-1. The 7-1 is same as the default test_every 8 option commonly used
+  train_split: "7-1" # other options: 4-1
+
+  load_ply: "" # If set, the Gaussians will be initialized from the given PLY file.
+  load_nerf_normalization: "" # If set, load an existing normalization to all camera entries.
+  save_ply: !!bool True 
+
+  remove_bg: !!bool True # remove the background if set to be True. Only valid when gt mask is provided. 
+
+  start_timestamp_ns: -1
+  end_timestamp_ns: -1
+
+  # the quantization number for the rows (of RGB cameras). Increase the number will significant slow down the rendering
+  rolling_shutter_row_index_quantization: 8 
+
+  # downscale the image by a factor of 1,2,4,8
+  data_factor: 1
+
+model:
+  sh_degree: 3
+  dim_extra: 0
+  white_background: !!bool False
+
+  # Enable the 3D smooth filter (used in Mip-Splatting) if set to True
+  # We will in default enable this feature since it will help free-view synthesis
+  use_3d_smooth_filter: !!bool True 
+
+camera: 
+  camera_name: "rgb" # "rgb", "slam"   
+  resolution: -1 # use the default resolution
+
+  use_bilateral_grid: !!bool False 
+  view_dependent_transform: !!bool False
+  # Shape of the bilateral grid (X, Y, W)
+  bilateral_grid_shape: [32, 32, 16]
+
+  # If using multiple different modalities of camera. They will share the luminance space using bilateral grid
+  # Will automatically force the bilateral grid to be used. 
+  share_luminance_space: !!bool False 
+
+render: 
+  # render script to be enabled at test time 
+  render_only: !!bool False 
+  render_json: ""
+  render_output: ${output_root}/${exp_name}/render
+  render_image: !!bool True 
+  render_depth: !!bool True
+  render_normal: !!bool True
+  render_gt: !!bool False
+
+  viewspace_normal: !!bool True
+
+  gain_amplify: 1.0
+
+  start_timestamp_ns: -1
+  end_timestamp_ns: -1
+
+  depth_min: 0.1 # minimum depth to clip in rendering
+  depth_max: 7.0 # maximum depth to clip in rendering 
+
+  # densify the output rendering to certain fps if chosen a number > 1.0
+  render_fps: 1
+  # sample keyframes from the provided render_json with an interval in seconds. 
+  # For a 1.0 second video, the frames that 
+  sample_interval_s: 1
+
+  # sample interval
+  sample_interval: 8
+
+  # Digital zoom-in / out ratio 
+  # For value 4.0, the image will be rendered at 4.0 zoomed in. 
+  zoom: 1.0
+  render_height: 960
+
+  # width / height 
+  # Note: for Aria video, it needs to be rotated 90 clockwise to be gravity aligned. 
+  # Thus, for 4/3 target aspect ratio in rendering, it should be set as 3/4 here.
+  aspect_ratio: -1 #1.0   
+  
