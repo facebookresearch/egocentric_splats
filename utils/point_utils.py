@@ -78,5 +78,5 @@ def project(point3d: np.ndarray, T_w2c: np.ndarray, calibK: np.ndarray, frame_h:
         return u_proj[mask > 0], v_proj[mask > 0], z[mask > 0], mask
     else:
         if u_proj < 0 or u_proj >= frame_w -1 or v_proj < 0 or v_proj >= frame_h - 1 and z > 0: 
-            return None, None, None
-        return u_proj, v_proj, z
+            return None, None, None, None
+        return u_proj, v_proj, z, None
