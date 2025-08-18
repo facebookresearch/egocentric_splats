@@ -164,15 +164,20 @@ def project(
         )
         return u_proj[mask > 0], v_proj[mask > 0], z[mask > 0], mask
     else:
+        # normalize to scalars to handle 0d or (1,) consistently
+        u_proj_val = np.asarray(u_proj).item()
+        v_proj_val = np.asarray(v_proj).item()
+        z_val = np.asarray(z).item()
         if (
-            u_proj < 0
-            or u_proj >= frame_w - 1
-            or v_proj < 0
-            or v_proj >= frame_h - 1
-            and z > 0
+            u_proj_val < 0
+            or u_proj_val >= frame_w - 1
+            or v_proj_val < 0
+            or v_proj_val >= frame_h - 1
+            and z_val > 0
         ):
-            return None, None, None, np.array([False])
-        return u_proj, v_proj, z, np.array([True])
+            # return 1d arrays so downstream concatenations works
+            return np.array([]), np.array([]), np.array([]), np.array([False])
+        return np.array([u_proj_val]), np.array([v_proj_val]), np.array([z_val]), np.array([True])
 
 
 def read_frames_from_metadata(transforms_json: str = "transforms.json"):

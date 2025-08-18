@@ -970,10 +970,10 @@ def create_visible_depth_map(
 
             u, v, z, _ = project(pt3d[:, None], w2c, calibK, frame_h, frame_w)
 
-            if u is not None:
-                frame_pts3d["u"].append(u[0])
-                frame_pts3d["v"].append(v[0])
-                frame_pts3d["z"].append(z[0])
+            if u.size > 0:
+                frame_pts3d["u"].append(float(u[0]))
+                frame_pts3d["v"].append(float(v[0]))
+                frame_pts3d["z"].append(float(z[0]))
                 frame_pts3d["inverseDistanceStd"].append(
                     points3d[uid].inverse_distance_std
                 )
